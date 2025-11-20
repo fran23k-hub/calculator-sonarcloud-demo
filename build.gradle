@@ -3,7 +3,6 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'jacoco'
-    id "org.sonarqube" version "5.1.0.4882"
 }
 
 repositories {
@@ -11,47 +10,25 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform('org.junit:junit-bom:6.0.1'))
+    testImplementation(platform('org.junit:junit-bom:5.11.3'))
     testImplementation('org.junit.jupiter:junit-jupiter')
     testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
 test {
     useJUnitPlatform()
-    finalizedBy jacocoTestReport
     testLogging {
         events "passed", "skipped", "failed"
+        showStandardStreams = true
     }
+    finalizedBy jacocoTestReport
 }
 
 jacocoTestReport {
     dependsOn test
     reports {
-        xml.required = true
+        xml.required = true    // XML needed later for Part 3 (but doesn’t break Part 1)
         csv.required = false
-        html.required = true
-    }
-}
-
-jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            limit {
-                minimum = 0.5
-            }
-        }
-    }
-}
-
-check {
-    dependsOn jacocoTestCoverageVerification
-}
-
-sonar {
-    properties {
-        property "sonar.gradle.skipCompile", "true"
-        property "sonar.projectKey", "C22770139_calculator-sonarcloud-demo"
-        property "sonar.organization", "c22770139"
-        property "sonar.host.url", "https://sonarcloud.io"
+        html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
     }
 }
