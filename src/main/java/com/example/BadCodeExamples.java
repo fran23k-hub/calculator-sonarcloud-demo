@@ -34,8 +34,8 @@ public class BadCodeExamples {
     }
 
     public void infiniteLoop() {
-        while (false) {
-            System.out.println("This will run forever");
+        for (int i = 0; i < 1; i++) {
+            System.out.println("Running once instead of forever");
         }
     }
 
