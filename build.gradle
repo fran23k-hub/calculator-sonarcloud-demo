@@ -1,22 +1,48 @@
 plugins {
-	id 'java'
-	id 'eclipse' // optional (to generate Eclipse project files)
-	id 'idea' // optional (to generate IntelliJ IDEA project files)
+    id 'java'
+    id 'eclipse'       // optional
+    id 'idea'          // optional
+    id 'jacoco'        // REQUIRED for coverage
+    id "org.sonarqube" version "4.4.1.3373"   // REQUIRED for SonarCloud
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	testImplementation(platform('org.junit:junit-bom:6.0.1'))
-	testImplementation('org.junit.jupiter:junit-jupiter')
-	testRuntimeOnly('org.junit.platform:junit-platform-launcher')
+    testImplementation(platform('org.junit:junit-bom:6.0.1'))
+    testImplementation('org.junit.jupiter:junit-jupiter')
+    testRuntimeOnly('org.junit.platform:junit-platform-launcher')
 }
 
 test {
-	useJUnitPlatform()
-	testLogging {
-		events "passed", "skipped", "failed"
-	}
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport    // generate coverage after tests
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true     // Azure + SonarCloud NEED THIS
+        csv.required = false
+        html.required = true
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.5   // 50% coverage requirement (lab recommended)
+            }
+        }
+    }
+}
+
+check {
+    dependsOn jacocoTestCoverageVerification
 }
