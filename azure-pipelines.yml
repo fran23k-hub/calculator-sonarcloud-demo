@@ -8,32 +8,33 @@ steps:
 - checkout: self
   fetchDepth: 0
 
-# -------- SonarCloud: Prepare (using Gradle scanner) --------
+# Prepare SonarCloud using GRADLE scanner
 - task: SonarCloudPrepare@3
   inputs:
     SonarCloud: 'SonarConnection'
     organization: 'C22770139'
-    scannerMode: 'gradle'
-    configMode: 'file'
+    scannerMode: 'Other'         
+    configMode: 'manual'          
     extraProperties: |
       sonar.projectKey=C22770139_calculator-sonarcloud-demo
       sonar.projectName=calculator-sonarcloud-demo
+      sonar.gradle.skipCompile=true
 
-# -------- Build + Test + Coverage (NO sonar task here!) --------
+# Build + test + coverage (NO sonar here)
 - task: Gradle@3
   inputs:
     gradleWrapperFile: 'gradlew'
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
-    tasks: 'clean build test jacocoTestReport'
+    tasks: 'clean build test jacocoTestReport sonar'
 
-# -------- Publish Coverage to Azure DevOps --------
+# Publish coverage to Azure DevOps
 - task: PublishCodeCoverageResults@2
   inputs:
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/build/reports/jacoco/test/jacocoTestReport.xml'
     pathToSources: '$(System.DefaultWorkingDirectory)/src/main/java/'
 
-# -------- SonarCloud Final Publish --------
+# Finalize SonarCloud analysis
 - task: SonarCloudPublish@3
   inputs:
     pollingTimeoutSec: '300'
