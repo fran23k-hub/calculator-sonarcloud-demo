@@ -50,5 +50,8 @@ check {
 sonar {
     properties {
         property "sonar.gradle.skipCompile", "true"
+        property "sonar.projectKey", "C22770139_calculator-sonarcloud-demo"
+        property "sonar.organization", "c22770139"
+        property "sonar.host.url", "https://sonarcloud.io"
     }
 }
