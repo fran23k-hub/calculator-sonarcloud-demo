@@ -1,9 +1,15 @@
 plugins {
     id 'java'
-    id 'eclipse'       // optional
-    id 'idea'          // optional
-    id 'jacoco'        // REQUIRED for coverage
-    id "org.sonarqube" version "4.4.1.3373"   // REQUIRED for SonarCloud
+    id 'eclipse'
+    id 'idea'
+    id 'jacoco'
+    id "org.sonarqube" version "4.4.1.3373"
+}
+
+sonar {
+    properties {
+        property "sonar.gradle.skipCompile", "true"
+    }
 }
 
 repositories {
@@ -18,7 +24,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    finalizedBy jacocoTestReport    // generate coverage after tests
+    finalizedBy jacocoTestReport
     testLogging {
         events "passed", "skipped", "failed"
     }
@@ -27,7 +33,7 @@ test {
 jacocoTestReport {
     dependsOn test
     reports {
-        xml.required = true     // Azure + SonarCloud NEED THIS
+        xml.required = true
         csv.required = false
         html.required = true
     }
@@ -37,7 +43,7 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.5   // 50% coverage requirement (lab recommended)
+                minimum = 0.5
             }
         }
     }
