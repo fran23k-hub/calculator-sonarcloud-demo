@@ -8,6 +8,17 @@ steps:
 - checkout: self
   fetchDepth: 0
 
+# Prepare SonarCloud
+- task: SonarCloudPrepare@3
+  inputs:
+    SonarCloud: 'SonarConnection'
+    organization: 'c22770139'
+    scannerMode: 'other'
+    extraProperties: |
+      sonar.projectKey=C22770139_calculator-sonarcloud-demo
+      sonar.projectName=calculator-sonarcloud-demo
+
+# Build + test + coverage + sonar
 - task: Gradle@3
   inputs:
     workingDirectory: ''
@@ -18,9 +29,15 @@ steps:
     jdkArchitectureOption: 'x64'
     publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
-    tasks: 'clean build test jacocoTestReport'
+    tasks: 'clean build test jacocoTestReport sonar'
+
+# Publish coverage to Azure DevOps (optional, but your lab wants it)
 - task: PublishCodeCoverageResults@2
   inputs:
     summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/build/reports/jacoco/test/jacocoTestReport.xml'
     pathToSources: '$(System.DefaultWorkingDirectory)/src/main/java/'
-    
+
+# Publish results to SonarCloud
+- task: SonarCloudPublish@3
+  inputs:
+    pollingTimeoutSec: '300'
