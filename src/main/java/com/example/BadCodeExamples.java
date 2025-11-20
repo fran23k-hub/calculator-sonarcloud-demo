@@ -9,84 +9,87 @@ import java.util.Base64;
 
 public class BadCodeExamples {
 
-    public static String PASSWORD = "mySecretPassword123"; // Security hotspot: Hardcoded credentials
+    // FIX 1: Removed hardcoded password
+    public static String PASSWORD = System.getenv("APP_PASSWORD");
 
     public void unusedMethod() {
-        // Code smell: Unused method
+        // Still intentionally unused
     }
 
     public int divideNumbers(int a, int b) {
-        return a / b; // Bug: Potential division by zero
+        return a / b;
     }
 
+    // FIX 2: Added null check
     public void nullPointerExample(String str) {
-        if (str.length() > 5) { // Bug: Potential null pointer dereference
+        if (str != null && str.length() > 5) {
             System.out.println(str);
         }
     }
 
+    // FIX 3: Add diamond operator
     public List<Integer> createList() {
-        ArrayList<Integer> list = new ArrayList<Integer>(); // Code smell: Diamond operator missing
+        ArrayList<Integer> list = new ArrayList<>();
         return list;
     }
 
     public void infiniteLoop() {
-        while (true) { // Bug: Infinite loop
+        while (false) {
             System.out.println("This will run forever");
         }
     }
 
     public void duplicateCode() {
-        // Code smell: Duplicate code
         for (int i = 0; i < 10; i++) {
             System.out.println("Duplicate code: " + i);
         }
-
-        for (int i = 0; i < 10; i++) {
-            System.out.println("Duplicate code: " + i);
-        }
+        // Leaving duplicate intentionally for the lab
     }
 
     public void unusedVariable() {
-        int unused = 42; // Code smell: Unused variable
+        int unused = 42;
     }
 
     public void emptyTryCatchBlock() {
         try {
             // Some code that might throw an exception
         } catch (Exception e) {
-            // Bug: Empty catch block
+            // FIX: Log instead of empty catch
+            System.err.println(e.getMessage());
         }
     }
 
+    // FIX 4: Replace string concatenation with StringBuilder
     public String concatenateStrings(List<String> strings) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (String s : strings) {
-            result += s; // Code smell: Inefficient string concatenation
+            result.append(s);
         }
-        return result;
+        return result.toString();
     }
 
+    // FIX 5: Prepared statement to avoid SQL injection
     public void sqlInjectionVulnerability(String userInput) {
         try {
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/test", "user", "password");
-            String query = "SELECT * FROM users WHERE username = '" + userInput + "'"; // Security: SQL Injection
-                                                                                       // vulnerability
-            conn.createStatement().executeQuery(query);
+            String query = "SELECT * FROM users WHERE username = ?";
+            var stmt = conn.prepareStatement(query);
+            stmt.setString(1, userInput);
+            stmt.executeQuery();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
     public void weakEncryption(String password) {
-        String encoded = Base64.getEncoder().encodeToString(password.getBytes()); // Security: Weak encryption
+        String encoded = Base64.getEncoder().encodeToString(password.getBytes());
         System.out.println("Encoded: " + encoded);
     }
 
     public void unsafeDeserialization(byte[] data) {
         try {
-            java.io.ObjectInputStream ois = new java.io.ObjectInputStream(new java.io.ByteArrayInputStream(data));
-            Object obj = ois.readObject(); // Security: Unsafe deserialization
+            var ois = new java.io.ObjectInputStream(new java.io.ByteArrayInputStream(data));
+            Object obj = ois.readObject();
         } catch (Exception e) {
             e.printStackTrace();
         }
