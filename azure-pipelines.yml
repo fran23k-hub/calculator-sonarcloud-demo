@@ -1,0 +1,38 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- checkout: self
+  fetchDepth: 0
+
+# Prepare SonarCloud
+- task: SonarCloudPrepare@3
+  inputs:
+    SonarCloud: 'SonarConnection'
+    organization: 'C22770139'
+    scannerMode: 'other'
+    extraProperties: |
+      sonar.projectKey=C22770139_calculator-sonarcloud-demo
+      sonar.projectName=calculator-sonarcloud-demo
+
+# Build + test + coverage + sonar analysis
+- task: Gradle@3
+  inputs:
+    gradleWrapperFile: 'gradlew'
+    testResultsFiles: '**/TEST-*.xml'
+    publishJUnitResults: true
+    tasks: 'clean build test jacocoTestReport sonar'
+
+# Publish coverage report to Azure DevOps
+- task: PublishCodeCoverageResults@2
+  inputs:
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/jacocoTestReport.xml'
+    pathToSources: '$(System.DefaultWorkingDirectory)/src/main/java/'
+
+# Publish SonarCloud results
+- task: SonarCloudPublish@3
+  inputs:
+    pollingTimeoutSec: '300'
